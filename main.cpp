@@ -5,7 +5,7 @@ using namespace std;
 
 int main()
 {
-    int grid_cell_size = 36;
+    int grid_cell_size = 50;
     int grid_width = 8;
     int grid_height = 8;
 
@@ -137,6 +137,7 @@ int main()
         SDL_SetRenderDrawColor(renderer, grid_cursor_color.r,
                                grid_cursor_color.g, grid_cursor_color.b,
                                grid_cursor_color.a);
+        SDL_RenderDrawPoint(renderer, grid_cursor.x-25, grid_cursor.y);
         SDL_RenderFillRect(renderer, &grid_cursor);
 
         SDL_RenderPresent(renderer);
