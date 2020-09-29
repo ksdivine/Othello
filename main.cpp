@@ -3,6 +3,77 @@
 #include <iostream>
 using namespace std;
 
+void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32_t radius)
+{
+   const int32_t diameter = (radius * 2);
+
+   int32_t x = (radius - 1);
+   int32_t y = 0;
+   int32_t tx = 1;
+   int32_t ty = 1;
+   int32_t error = (tx - diameter);
+
+   while (x >= y)
+   {
+      // Lines left to right
+      SDL_RenderDrawLine(renderer, centreX + x, centreY + y, centreX + x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX + x, centreY + y, centreX + x, centreY - y);
+      SDL_RenderDrawLine(renderer, centreX + x, centreY + y, centreX - x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX + x, centreY + y, centreX - x, centreY - y);
+
+      SDL_RenderDrawLine(renderer, centreX + x, centreY - y, centreX + x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX + x, centreY - y, centreX + x, centreY - y);
+      SDL_RenderDrawLine(renderer, centreX + x, centreY - y, centreX - x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX + x, centreY - y, centreX - x, centreY - y);
+
+      SDL_RenderDrawLine(renderer, centreX - x, centreY + y, centreX + x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX - x, centreY + y, centreX + x, centreY - y);
+      SDL_RenderDrawLine(renderer, centreX - x, centreY + y, centreX - x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX - x, centreY + y, centreX - x, centreY - y);
+
+      SDL_RenderDrawLine(renderer, centreX - x, centreY - y, centreX + x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX - x, centreY - y, centreX + x, centreY - y);
+      SDL_RenderDrawLine(renderer, centreX - x, centreY - y, centreX - x, centreY + y);
+      SDL_RenderDrawLine(renderer, centreX - x, centreY - y, centreX - x, centreY - y);
+
+      // Top to bottom
+      SDL_RenderDrawLine(renderer, centreX + y, centreY + x, centreX + y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX + y, centreY + x, centreX + y, centreY - x);
+      SDL_RenderDrawLine(renderer, centreX + y, centreY + x, centreX - y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX + y, centreY + x, centreX - y, centreY - x);
+
+      SDL_RenderDrawLine(renderer, centreX + y, centreY - x, centreX + y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX + y, centreY - x, centreX + y, centreY - x);
+      SDL_RenderDrawLine(renderer, centreX + y, centreY - x, centreX - y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX + y, centreY - x, centreX - y, centreY - x);
+
+      SDL_RenderDrawLine(renderer, centreX - y, centreY + x, centreX + y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX - y, centreY + x, centreX + y, centreY - x);
+      SDL_RenderDrawLine(renderer, centreX - y, centreY + x, centreX - y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX - y, centreY + x, centreX - y, centreY - x);
+
+      SDL_RenderDrawLine(renderer, centreX - y, centreY - x, centreX + y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX - y, centreY - x, centreX + y, centreY - x);
+      SDL_RenderDrawLine(renderer, centreX - y, centreY - x, centreX - y, centreY + x);
+      SDL_RenderDrawLine(renderer, centreX - y, centreY - x, centreX - y, centreY - x);
+
+      if (error <= 0)
+      {
+         ++y;
+         error += ty;
+         ty += 2;
+      }
+
+      if (error > 0)
+      {
+         --x;
+         tx += 2;
+         error += (tx - diameter);
+      }
+   }
+}
+
+
 int main()
 {
     int grid_cell_size = 50;
@@ -137,8 +208,8 @@ int main()
         SDL_SetRenderDrawColor(renderer, grid_cursor_color.r,
                                grid_cursor_color.g, grid_cursor_color.b,
                                grid_cursor_color.a);
-        SDL_RenderDrawPoint(renderer, grid_cursor.x-25, grid_cursor.y);
-        SDL_RenderFillRect(renderer, &grid_cursor);
+        DrawCircle(renderer, grid_cursor.x + 25, grid_cursor.y + 25, 20);
+        // SDL_RenderFillRect(renderer, &grid_cursor);
 
         SDL_RenderPresent(renderer);
         }
