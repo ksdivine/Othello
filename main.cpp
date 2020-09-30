@@ -78,10 +78,19 @@ int main()
 {
     bool player_one_turn = true;
     bool player_two_turn = false;
+
     int grid_cell_size = 50;
     int grid_width = 8;
     int grid_height = 8;
     int grid_places [grid_width][grid_height] = {};
+
+    grid_places[4][3] = 1;
+    grid_places[3][4] = 1;
+
+    grid_places[3][3] = 2;
+    grid_places[4][4] = 2;
+
+
     int i = 0;
     int j = 0;
     for(i = 0; i < grid_height; i++)
@@ -111,10 +120,11 @@ int main()
                                   grid_cell_size};
 
     // Dark theme.
-    SDL_Color grid_background = {22, 22, 22, 255}; // Barely Black
+    SDL_Color grid_background = {1, 162, 99, 255}; // Barely Black
     SDL_Color grid_line_color = {44, 44, 44, 255}; // Dark grey
-    SDL_Color grid_cursor_ghost_color = {44, 44, 44, 255};
-    SDL_Color grid_cursor_color = {255, 255, 255, 255}; // White
+    SDL_Color grid_cursor_ghost_color = {20, 182, 119, 255};
+    SDL_Color player_one_color = {0, 0, 0, 255}; // White
+    SDL_Color player_two_color = {255, 255, 255, 255}; // White
 
     // Light Theme.
     // SDL_Color grid_background = {233, 233, 233, 255}; // Barely white
@@ -172,7 +182,6 @@ int main()
                 grid_cursor.y = (event.motion.y / grid_cell_size) * grid_cell_size;
                 // cout << grid_cursor.x/50 << ":" << grid_cursor.y/50 << "\n";
                 // cout << grid_cursor.x << "~~" << grid_cursor.y<< "\n";
-                // TODO: draw permenant circles for each player press
                 if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 0 && player_one_turn)
                 {
                     grid_places[grid_cursor.x/50][grid_cursor.y/50] = 1;
@@ -203,7 +212,7 @@ int main()
                 quit = SDL_TRUE;
                 break;
             }
-
+        }
         // Draw grid background.
         SDL_SetRenderDrawColor(renderer, grid_background.r, grid_background.g,
                                grid_background.b, grid_background.a);
@@ -233,15 +242,33 @@ int main()
         }
 
         // Draw grid cursor.
-        SDL_SetRenderDrawColor(renderer, grid_cursor_color.r,
-                               grid_cursor_color.g, grid_cursor_color.b,
-                               grid_cursor_color.a);
-        DrawCircle(renderer, grid_cursor.x + 25, grid_cursor.y + 25, 20);
+        for(i = 0; i < grid_height; i++)
+        {
+            for(j = 0; j < grid_width; j++)
+            {
+                // cout << grid_places[j][i] << " ";
+                if(grid_places[j][i] == 1)
+                {
+                    SDL_SetRenderDrawColor(renderer, player_one_color.r,
+                               player_one_color.g, player_one_color.b,
+                               player_one_color.a);
+                    DrawCircle(renderer, j*50 + 25, i*50 + 25, 20);
+                }
+                else if(grid_places[j][i] == 2)
+                {
+                    SDL_SetRenderDrawColor(renderer, player_two_color.r,
+                               player_two_color.g, player_two_color.b,
+                               player_two_color.a);
+                    DrawCircle(renderer, j*50 + 25, i*50 + 25, 20);
+                }
+            }
+            // cout << "\n";
+        }
         // cout << grid_cursor.x << " " << grid_cursor.y << "\n";
         // SDL_RenderFillRect(renderer, &grid_cursor);
 
         SDL_RenderPresent(renderer);
-        }
+        
     }
     cout << "\n";
     for(i = 0; i < grid_height; i++)
