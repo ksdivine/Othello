@@ -76,9 +76,22 @@ void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32
 
 int main()
 {
+    bool player_one_turn = true;
+    bool player_two_turn = false;
     int grid_cell_size = 50;
     int grid_width = 8;
     int grid_height = 8;
+    int grid_places [grid_width][grid_height] = {};
+    int i = 0;
+    int j = 0;
+    for(i = 0; i < grid_height; i++)
+    {
+        for(j = 0; j < grid_width; j++)
+        {
+            cout << grid_places[j][i] << " ";
+        }
+        cout << "\n";
+    }
 
     // + 1 so that the last grid lines fit in the screen.
     int window_width = (grid_width * grid_cell_size) + 1;
@@ -86,8 +99,8 @@ int main()
 
     // Place the grid cursor in the middle of the screen.
     SDL_Rect grid_cursor = {
-        .x = (grid_width - 1) / 2 * grid_cell_size,
-        .y = (grid_height - 1) / 2 * grid_cell_size,
+        .x = 0,//(grid_width - 1) / 2 * grid_cell_size,
+        .y = 0,//(grid_height - 1) / 2 * grid_cell_size,
         .w = grid_cell_size,
         .h = grid_cell_size,
     };
@@ -157,6 +170,21 @@ int main()
             case SDL_MOUSEBUTTONDOWN:
                 grid_cursor.x = (event.motion.x / grid_cell_size) * grid_cell_size;
                 grid_cursor.y = (event.motion.y / grid_cell_size) * grid_cell_size;
+                // cout << grid_cursor.x/50 << ":" << grid_cursor.y/50 << "\n";
+                // cout << grid_cursor.x << "~~" << grid_cursor.y<< "\n";
+                // TODO: draw permenant circles for each player press
+                if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 0 && player_one_turn)
+                {
+                    grid_places[grid_cursor.x/50][grid_cursor.y/50] = 1;
+                    player_one_turn = false;
+                    player_two_turn = true;
+                }
+                else if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 0 && player_two_turn)
+                {
+                    grid_places[grid_cursor.x/50][grid_cursor.y/50] = 2;
+                    player_one_turn = true;
+                    player_two_turn = false;
+                }
                 break;
             case SDL_MOUSEMOTION:
                 grid_cursor_ghost.x = (event.motion.x / grid_cell_size) * grid_cell_size;
@@ -209,12 +237,21 @@ int main()
                                grid_cursor_color.g, grid_cursor_color.b,
                                grid_cursor_color.a);
         DrawCircle(renderer, grid_cursor.x + 25, grid_cursor.y + 25, 20);
+        // cout << grid_cursor.x << " " << grid_cursor.y << "\n";
         // SDL_RenderFillRect(renderer, &grid_cursor);
 
         SDL_RenderPresent(renderer);
         }
     }
-
+    cout << "\n";
+    for(i = 0; i < grid_height; i++)
+    {
+        for(j = 0; j < grid_width; j++)
+        {
+            cout << grid_places[j][i] << " ";
+        }
+        cout << "\n";
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
