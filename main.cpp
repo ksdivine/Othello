@@ -249,6 +249,12 @@ int main()
                 // cout << grid_places[j][i] << " ";
                 if(grid_places[j][i] == 1)
                 {
+                    if(player_one_turn)
+                    {
+                        // grid_places = checkTile(grid_places,i,j);
+                    }
+
+                    // If player 1 draw black circle
                     SDL_SetRenderDrawColor(renderer, player_one_color.r,
                                player_one_color.g, player_one_color.b,
                                player_one_color.a);
@@ -256,6 +262,7 @@ int main()
                 }
                 else if(grid_places[j][i] == 2)
                 {
+                    // If player 2 draw black circle
                     SDL_SetRenderDrawColor(renderer, player_two_color.r,
                                player_two_color.g, player_two_color.b,
                                player_two_color.a);
@@ -284,4 +291,23 @@ int main()
     SDL_Quit();
 
     return EXIT_SUCCESS;
+}
+
+int checkTile(int grid_places [8][8], int tilex, int tiley, int player)
+{
+    int temp [8][8];
+    temp = checkUpLeft(grid_places[tilex][tiley]);
+
+}
+
+int checkUpLeft(int grid_places [8][8], int player)
+{
+    // possible flag for if a tile will be able to be placed (need to be able to check for top and left wall)
+    // if no possible flag, return the starting grid_places
+    int possible_flag = 0;
+    if(grid_places[tilex - 1][tiley + 1] != player)
+    {
+        // set tilex & tiley -/+ 1 to variables that can be incremented to further see if possible
+        
+    }
 }
