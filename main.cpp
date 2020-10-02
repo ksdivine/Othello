@@ -77,17 +77,17 @@ void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32
 }
 
 
-std::tuple<int, int> checkUpLeft(int* grid_places [GRID_WIDTH], int tilex, int tiley, int player, int opponent)
+std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int tiley, int player, int opponent, int cur_x_offset, int cur_y_offset)
 {
     // possible flag for if a tile will be able to be placed (need to be able to check for top and left wall)
     // if no possible flag, return the starting grid_places
     int cur_tile;
-    int cur_x = tilex - 1;
-    int cur_y = tiley - 1;
+    int cur_x = tilex + cur_x_offset;
+    int cur_y = tiley + cur_y_offset;
     cur_tile = grid_places[cur_x][cur_y];
 
     // If top left tile is not an opponents tile it will not be considered
-    if(cur_tile == player || cur_tile == 0 || cur_tile == 3)
+    if(cur_tile == player || cur_tile == 0 || cur_tile == 3 || (cur_x_offset == 0 && cur_y_offset == 0))
     {
         // Need to take in the right parameter and change the function type
         return std::make_tuple(-1,-1);
@@ -95,10 +95,10 @@ std::tuple<int, int> checkUpLeft(int* grid_places [GRID_WIDTH], int tilex, int t
     }
 
     // If top left tile is opponents, continue looking up left until it finds a wall or a different tile
-    while(cur_tile == opponent && cur_x >= 0 && cur_y >= 0)
+    while(cur_tile == opponent && cur_x >= 0 && cur_y >= 0 && cur_x < 8 && cur_y < 8)
     {
-        cur_x--;
-        cur_y--;
+        cur_x += cur_x_offset;
+        cur_y += cur_y_offset;
         cur_tile = grid_places[cur_x][cur_y];
     }
 
@@ -112,11 +112,6 @@ std::tuple<int, int> checkUpLeft(int* grid_places [GRID_WIDTH], int tilex, int t
         // If did not find viable tile, return original grid
         return std::make_tuple(-1,-1);
     }
-}
-
-int** checkTile(int grid_places [GRID_WIDTH][GRID_HEIGHT], int tilex, int tiley, int player, int opponent)
-{
-    // auto topLeft = checkUpLeft(grid_places[tilex][tiley], tilex, tiley, player, opponent);
 }
 
 
@@ -303,11 +298,21 @@ int main()
                         int player = 1;
                         int opponent = 2;
                         // grid_places = checkTile(grid_places,i,j);
-                        auto tup = checkUpLeft(grid_places, j, i, player, opponent);
-                        if (std::get<0>(tup) != -1 && std::get<1>(tup) != -1)
+                        int x;
+                        int y;
+                        for(x = -1; x < 2; x++)
                         {
-                            grid_places[std::get<0>(tup)][std::get<1>(tup)] = 3;
+                            for(y = -1; y < 2; y++)
+                            {
+                                auto tup = checkTile(grid_places, j, i, player, opponent, x, y);
+                                if (std::get<0>(tup) != -1 && std::get<1>(tup) != -1)
+                                {
+                                    grid_places[std::get<0>(tup)][std::get<1>(tup)] = 3;
+                                }
+                            }
                         }
+
+
                     }
 
                     // If player 1 draw black circle
