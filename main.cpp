@@ -1,7 +1,10 @@
 #include <SDL2/SDL.h>
+#include <tuple>
 #include <string>
 #include <iostream>
-using namespace std;
+#define GRID_HEIGHT 8
+#define GRID_WIDTH 8
+// using namespace std;
 
 void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32_t radius)
 {
@@ -74,6 +77,49 @@ void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32
 }
 
 
+std::tuple<int, int> checkUpLeft(int* grid_places [GRID_WIDTH], int tilex, int tiley, int player, int opponent)
+{
+    // possible flag for if a tile will be able to be placed (need to be able to check for top and left wall)
+    // if no possible flag, return the starting grid_places
+    int cur_tile;
+    int cur_x = tilex - 1;
+    int cur_y = tiley - 1;
+    cur_tile = grid_places[cur_x][cur_y];
+
+    // If top left tile is not an opponents tile it will not be considered
+    if(cur_tile == player || cur_tile == 0 || cur_tile == 3)
+    {
+        // Need to take in the right parameter and change the function type
+        return std::make_tuple(-1,-1);
+        // return grid_places;
+    }
+
+    // If top left tile is opponents, continue looking up left until it finds a wall or a different tile
+    while(cur_tile == opponent && cur_x >= 0 && cur_y >= 0)
+    {
+        cur_x--;
+        cur_y--;
+        cur_tile = grid_places[cur_x][cur_y];
+    }
+
+    // If after searching the tile is uninhabitated, then add as a possible tile and return
+    if(cur_tile == 0)
+    {
+        return std::make_tuple(cur_x,cur_y);
+    }
+    else 
+    {
+        // If did not find viable tile, return original grid
+        return std::make_tuple(-1,-1);
+    }
+}
+
+int** checkTile(int grid_places [GRID_WIDTH][GRID_HEIGHT], int tilex, int tiley, int player, int opponent)
+{
+    // auto topLeft = checkUpLeft(grid_places[tilex][tiley], tilex, tiley, player, opponent);
+}
+
+
 int main()
 {
     bool player_one_turn = true;
@@ -82,7 +128,15 @@ int main()
     int grid_cell_size = 50;
     int grid_width = 8;
     int grid_height = 8;
-    int grid_places [grid_width][grid_height] = {};
+    // int grid_places [grid_width][grid_height] = {};
+
+    int i = 0;
+    int j = 0;
+    int *grid_places[grid_width]; 
+
+    // Initialize the array
+    for (i=0; i < grid_width; i++) 
+         grid_places[i] = (int *)calloc(grid_height, sizeof(int)); 
 
     grid_places[4][3] = 1;
     grid_places[3][4] = 1;
@@ -91,15 +145,13 @@ int main()
     grid_places[4][4] = 2;
 
 
-    int i = 0;
-    int j = 0;
     for(i = 0; i < grid_height; i++)
     {
         for(j = 0; j < grid_width; j++)
         {
-            cout << grid_places[j][i] << " ";
+            std::cout << grid_places[j][i] << " ";
         }
-        cout << "\n";
+        std::cout << "\n";
     }
 
     // + 1 so that the last grid lines fit in the screen.
@@ -180,8 +232,6 @@ int main()
             case SDL_MOUSEBUTTONDOWN:
                 grid_cursor.x = (event.motion.x / grid_cell_size) * grid_cell_size;
                 grid_cursor.y = (event.motion.y / grid_cell_size) * grid_cell_size;
-                // cout << grid_cursor.x/50 << ":" << grid_cursor.y/50 << "\n";
-                // cout << grid_cursor.x << "~~" << grid_cursor.y<< "\n";
                 if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 0 && player_one_turn)
                 {
                     grid_places[grid_cursor.x/50][grid_cursor.y/50] = 1;
@@ -246,12 +296,18 @@ int main()
         {
             for(j = 0; j < grid_width; j++)
             {
-                // cout << grid_places[j][i] << " ";
                 if(grid_places[j][i] == 1)
                 {
                     if(player_one_turn)
                     {
+                        int player = 1;
+                        int opponent = 2;
                         // grid_places = checkTile(grid_places,i,j);
+                        auto tup = checkUpLeft(grid_places, j, i, player, opponent);
+                        if (std::get<0>(tup) != -1 && std::get<1>(tup) != -1)
+                        {
+                            grid_places[std::get<0>(tup)][std::get<1>(tup)] = 3;
+                        }
                     }
 
                     // If player 1 draw black circle
@@ -277,14 +333,14 @@ int main()
         SDL_RenderPresent(renderer);
         
     }
-    cout << "\n";
+    std::cout << "\n";
     for(i = 0; i < grid_height; i++)
     {
         for(j = 0; j < grid_width; j++)
         {
-            cout << grid_places[j][i] << " ";
+            std::cout << grid_places[j][i] << " ";
         }
-        cout << "\n";
+        std::cout << "\n";
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -293,21 +349,5 @@ int main()
     return EXIT_SUCCESS;
 }
 
-int checkTile(int grid_places [8][8], int tilex, int tiley, int player)
-{
-    int temp [8][8];
-    temp = checkUpLeft(grid_places[tilex][tiley]);
 
-}
 
-int checkUpLeft(int grid_places [8][8], int player)
-{
-    // possible flag for if a tile will be able to be placed (need to be able to check for top and left wall)
-    // if no possible flag, return the starting grid_places
-    int possible_flag = 0;
-    if(grid_places[tilex - 1][tiley + 1] != player)
-    {
-        // set tilex & tiley -/+ 1 to variables that can be incremented to further see if possible
-        
-    }
-}
