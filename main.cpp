@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <tuple>
+#include <vector>
 #include <string>
 #include <iostream>
 #define GRID_HEIGHT 8
@@ -75,6 +76,7 @@ void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32
       }
    }
 }
+
 
 
 std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int tiley, int player, int opponent, int cur_x_offset, int cur_y_offset)
@@ -227,15 +229,16 @@ int main()
             case SDL_MOUSEBUTTONDOWN:
                 grid_cursor.x = (event.motion.x / grid_cell_size) * grid_cell_size;
                 grid_cursor.y = (event.motion.y / grid_cell_size) * grid_cell_size;
-                if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 0 && player_one_turn)
+                if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 3 && player_one_turn)
                 {
                     grid_places[grid_cursor.x/50][grid_cursor.y/50] = 1;
                     player_one_turn = false;
                     player_two_turn = true;
                 }
-                else if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 0 && player_two_turn)
+                else if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 3 && player_two_turn)
                 {
                     grid_places[grid_cursor.x/50][grid_cursor.y/50] = 2;
+                    // changeTiles()
                     player_one_turn = true;
                     player_two_turn = false;
                 }
@@ -286,6 +289,18 @@ int main()
             SDL_RenderFillRect(renderer, &grid_cursor_ghost);
         }
 
+        // TODO: make func clear board
+        for(i = 0; i < grid_height; i++)
+        {
+            for(j = 0; j < grid_width; j++)
+            {
+                if(grid_places[j][i] == 3)
+                {
+                    grid_places[j][i] = 0;
+                }
+            }
+        }
+
         // Draw grid cursor.
         for(i = 0; i < grid_height; i++)
         {
@@ -297,7 +312,6 @@ int main()
                     {
                         int player = 1;
                         int opponent = 2;
-                        // grid_places = checkTile(grid_places,i,j);
                         int x;
                         int y;
                         for(x = -1; x < 2; x++)
@@ -311,8 +325,6 @@ int main()
                                 }
                             }
                         }
-
-
                     }
 
                     // If player 1 draw black circle
@@ -323,6 +335,25 @@ int main()
                 }
                 else if(grid_places[j][i] == 2)
                 {
+                    if(player_two_turn)
+                    {
+                        int player = 2;
+                        int opponent = 1;
+                        int x;
+                        int y;
+                        for(x = -1; x < 2; x++)
+                        {
+                            for(y = -1; y < 2; y++)
+                            {
+                                auto tup = checkTile(grid_places, j, i, player, opponent, x, y);
+                                if (std::get<0>(tup) != -1 && std::get<1>(tup) != -1)
+                                {
+                                    grid_places[std::get<0>(tup)][std::get<1>(tup)] = 3;
+                                }
+                            }
+                        }
+                    }
+
                     // If player 2 draw black circle
                     SDL_SetRenderDrawColor(renderer, player_two_color.r,
                                player_two_color.g, player_two_color.b,
@@ -334,6 +365,19 @@ int main()
         }
         // cout << grid_cursor.x << " " << grid_cursor.y << "\n";
         // SDL_RenderFillRect(renderer, &grid_cursor);
+        for(i = 0; i < grid_height; i++)
+        {
+            for(j = 0; j < grid_width; j++)
+            {
+                if(grid_places[j][i] == 3)
+                {
+                    SDL_SetRenderDrawColor(renderer, 40,
+                               255, 255,
+                               player_two_color.a);
+                    DrawCircle(renderer, j*50 + 25, i*50 + 25, 20);
+                }
+            }
+        }
 
         SDL_RenderPresent(renderer);
         
