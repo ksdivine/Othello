@@ -145,6 +145,29 @@ std::vector<std::tuple<int,int>> changeTile(int* grid_places [GRID_WIDTH], int t
 
 }
 
+std::tuple<int, int> get_tile_count(int* grid_places [GRID_WIDTH])
+{
+    int i;
+    int j;
+    int player_one_count = 0;
+    int player_two_count = 0;
+    for(i = 0; i < GRID_WIDTH; i++)
+    {
+        for(j = 0; j < GRID_HEIGHT; j++)
+        {
+            if(grid_places[j][i] == 1)
+            {
+                player_one_count++;
+            }
+            else if(grid_places[j][i] == 2)
+            {
+                player_two_count++;
+            }
+        }
+    }
+    return std::make_tuple(player_one_count,player_two_count);   
+}
+
 std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int tiley, int player, int opponent, int cur_x_offset, int cur_y_offset)
 {
     // possible flag for if a tile will be able to be placed (need to be able to check for top and left wall)
@@ -152,7 +175,7 @@ std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int til
     int cur_tile;
     int cur_x = tilex + cur_x_offset;
     int cur_y = tiley + cur_y_offset;
-    if(cur_x >= 0 && cur_y >= 0)
+    if(cur_x >= 0 && cur_y >= 0 && cur_x <= 7 && cur_y <= 7)
     {
         cur_tile = grid_places[cur_x][cur_y];
     }
@@ -160,16 +183,20 @@ std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int til
     // If top left tile is not an opponents tile it will not be considered
     if(cur_tile == player || cur_tile == 0 || cur_tile == 3 || (cur_x_offset == 0 && cur_y_offset == 0))
     {
-        // Need to take in the right parameter and change the function type
         return std::make_tuple(-1,-1);
-        // return grid_places;
     }
 
     // If top left tile is opponents, continue looking up left until it finds a wall or a different tile
-    while(cur_tile == opponent && cur_x > 0 && cur_y > 0 && cur_x < 8 && cur_y < 8)
+    while(cur_tile == opponent && (cur_x != 0 && cur_y != 0) && (cur_x != 0 && cur_y != 7) && (cur_x != 7 && cur_y != 0) && (cur_x != 7 && cur_y != 7)) //&& cur_x > 0 && cur_y > 0 && cur_x < 7 && cur_y < 7)
     {
-        cur_x += cur_x_offset;
-        cur_y += cur_y_offset;
+        if(cur_x < 7 && cur_x > 0)
+        {
+            cur_x += cur_x_offset;
+        }
+        if(cur_y > 0 && cur_y < 7)
+        {
+            cur_y += cur_y_offset;
+        }
         cur_tile = grid_places[cur_x][cur_y];
     }
 
@@ -185,6 +212,24 @@ std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int til
     }
 }
 
+bool check_end_game(int* grid_places[GRID_WIDTH])
+{
+    int i;
+    int j;
+    for(i = 0; i < GRID_WIDTH; i++)
+    {
+        for(j = 0; j < GRID_HEIGHT; j++)
+        {
+            if(grid_places[j][i] != 1 || grid_places[j][i] != 2)
+            {
+                return false;
+            }
+        }
+        std::cout << "middle of end game";
+    }
+    std::cout << "end of end game";
+    return true;
+}
 
 int main()
 {
@@ -232,6 +277,7 @@ int main()
         .h = grid_cell_size,
     };
 
+    SDL_Rect center_screen = {window_width/2, window_height/2, grid_cell_size*2, grid_cell_size*2};
     // The cursor ghost is a cursor that always shows in the cell below the
     // mouse cursor.
     SDL_Rect grid_cursor_ghost = {grid_cursor.x, grid_cursor.y, grid_cell_size,
@@ -241,14 +287,9 @@ int main()
     SDL_Color grid_background = {1, 162, 99, 255}; // Barely Black
     SDL_Color grid_line_color = {44, 44, 44, 255}; // Dark grey
     SDL_Color grid_cursor_ghost_color = {20, 182, 119, 255};
-    SDL_Color player_one_color = {0, 0, 0, 255}; // White
+    SDL_Color player_one_color = {0, 0, 0, 255}; // Black 
     SDL_Color player_two_color = {255, 255, 255, 255}; // White
 
-    // Light Theme.
-    // SDL_Color grid_background = {233, 233, 233, 255}; // Barely white
-    // SDL_Color grid_line_color = {200, 200, 200, 255}; // Very light grey
-    // SDL_Color grid_cursor_ghost_color = {200, 200, 200, 255};
-    // SDL_Color grid_cursor_color = {160, 160, 160, 255}; // Grey
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Initialize SDL: %s",
@@ -267,6 +308,7 @@ int main()
 
     SDL_SetWindowTitle(window, "SDL Grid");
 
+    bool end_game = false;
     SDL_bool quit = SDL_FALSE;
     SDL_bool mouse_active = SDL_FALSE;
     SDL_bool mouse_hover = SDL_FALSE;
@@ -440,12 +482,14 @@ int main()
                 }
             }
         }
+        bool possibleMoves = false;
         for(i = 0; i < grid_height; i++)
         {
             for(j = 0; j < grid_width; j++)
             {
                 if(grid_places[j][i] == 3 && player_one_turn)
                 {
+                    possibleMoves = true;
                     SDL_SetRenderDrawColor(renderer,
                                0, 0, 0,
                                player_two_color.a);
@@ -453,6 +497,7 @@ int main()
                 }
                 else if(grid_places[j][i] == 3 && player_two_turn)
                 {
+                    possibleMoves = true;
                     SDL_SetRenderDrawColor(renderer,
                                255, 255, 255,
                                player_two_color.a);
@@ -460,7 +505,24 @@ int main()
                 }
             }
         }
+        if(!possibleMoves)
+        {
+            player_one_turn = !player_one_turn;
+            player_two_turn = !player_two_turn;
+        }
 
+        end_game = check_end_game(grid_places);
+        if(end_game)
+        {
+            auto tup = get_tile_count(grid_places);
+            int player_one_count = std::get<0>(tup);
+            int player_two_count = std::get<1>(tup);
+            SDL_SetRenderDrawColor(renderer,
+                        0, 255, 255,
+                        player_two_color.a);
+            SDL_RenderFillRect(renderer, &center_screen);
+            std::cout << "end of if";
+        }
         SDL_RenderPresent(renderer);
         
     }
