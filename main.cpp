@@ -77,7 +77,34 @@ void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32
    }
 }
 
+std::vector<std::tuple<int,int>> changeTile(int* grid_places [GRID_WIDTH], int tilex, int tiley, int player, int opponent)
+{
+    std::vector<std::tuple<int, int>> to_be_changed = {};
+    int i;
+    int j;
+    for(i = -1; i < 2; i++)
+    {
+        for(j = -1; j < 2; j++)
+        {
+            std::vector<std::tuple<int, int>> temp = to_be_changed;
+            int cur_x = tilex + i;
+            int cur_y = tiley + j;
+            while(grid_places[cur_x][cur_y] == opponent)
+            {
+                temp.push_back(std::make_tuple(cur_x,cur_y));
+                cur_x += i;
+                cur_y += j;
+            }
+            if(grid_places[cur_x][cur_y] == player)
+            {
+                to_be_changed = temp;
+            }
+            
+        }
+    }
+    return to_be_changed;
 
+}
 
 std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int tiley, int player, int opponent, int cur_x_offset, int cur_y_offset)
 {
@@ -232,13 +259,22 @@ int main()
                 if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 3 && player_one_turn)
                 {
                     grid_places[grid_cursor.x/50][grid_cursor.y/50] = 1;
+                    auto tup_list = changeTile(grid_places, grid_cursor.x/50, grid_cursor.y/50, 1, 2);
+                    for(std::tuple<int,int> tup : tup_list)
+                    {
+                        grid_places[std::get<0>(tup)][std::get<1>(tup)] = 1;
+                    }
                     player_one_turn = false;
                     player_two_turn = true;
                 }
                 else if(grid_places[grid_cursor.x/50][grid_cursor.y/50] == 3 && player_two_turn)
                 {
                     grid_places[grid_cursor.x/50][grid_cursor.y/50] = 2;
-                    // changeTiles()
+                    auto tup_list = changeTile(grid_places, grid_cursor.x/50, grid_cursor.y/50, 2, 1);
+                    for(std::tuple<int,int> tup : tup_list)
+                    {
+                        grid_places[std::get<0>(tup)][std::get<1>(tup)] = 2;
+                    }
                     player_one_turn = true;
                     player_two_turn = false;
                 }
