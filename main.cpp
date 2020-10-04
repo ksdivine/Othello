@@ -7,6 +7,45 @@
 #define GRID_WIDTH 8
 // using namespace std;
 
+
+void DrawEmptyCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32_t radius)
+{
+   const int32_t diameter = (radius * 2);
+
+   int32_t x = (radius - 1);
+   int32_t y = 0;
+   int32_t tx = 1;
+   int32_t ty = 1;
+   int32_t error = (tx - diameter);
+
+   while (x >= y)
+   {
+      //  Each of the following renders an octant of the circle
+      SDL_RenderDrawPoint(renderer, centreX + x, centreY - y);
+      SDL_RenderDrawPoint(renderer, centreX + x, centreY + y);
+      SDL_RenderDrawPoint(renderer, centreX - x, centreY - y);
+      SDL_RenderDrawPoint(renderer, centreX - x, centreY + y);
+      SDL_RenderDrawPoint(renderer, centreX + y, centreY - x);
+      SDL_RenderDrawPoint(renderer, centreX + y, centreY + x);
+      SDL_RenderDrawPoint(renderer, centreX - y, centreY - x);
+      SDL_RenderDrawPoint(renderer, centreX - y, centreY + x);
+
+      if (error <= 0)
+      {
+         ++y;
+         error += ty;
+         ty += 2;
+      }
+
+      if (error > 0)
+      {
+         --x;
+         tx += 2;
+         error += (tx - diameter);
+      }
+   }
+}
+
 void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32_t radius)
 {
    const int32_t diameter = (radius * 2);
@@ -397,20 +436,24 @@ int main()
                     DrawCircle(renderer, j*50 + 25, i*50 + 25, 20);
                 }
             }
-            // cout << "\n";
         }
-        // cout << grid_cursor.x << " " << grid_cursor.y << "\n";
-        // SDL_RenderFillRect(renderer, &grid_cursor);
         for(i = 0; i < grid_height; i++)
         {
             for(j = 0; j < grid_width; j++)
             {
-                if(grid_places[j][i] == 3)
+                if(grid_places[j][i] == 3 && player_one_turn)
                 {
-                    SDL_SetRenderDrawColor(renderer, 40,
-                               255, 255,
+                    SDL_SetRenderDrawColor(renderer,
+                               0, 0, 0,
                                player_two_color.a);
-                    DrawCircle(renderer, j*50 + 25, i*50 + 25, 20);
+                    DrawEmptyCircle(renderer, j*50 + 25, i*50 + 25, 20);
+                }
+                else if(grid_places[j][i] == 3 && player_two_turn)
+                {
+                    SDL_SetRenderDrawColor(renderer,
+                               255, 255, 255,
+                               player_two_color.a);
+                    DrawEmptyCircle(renderer, j*50 + 25, i*50 + 25, 20);
                 }
             }
         }
@@ -433,6 +476,3 @@ int main()
 
     return EXIT_SUCCESS;
 }
-
-
-
