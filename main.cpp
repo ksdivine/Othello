@@ -128,13 +128,13 @@ std::vector<std::tuple<int,int>> changeTile(int* grid_places [GRID_WIDTH], int t
             std::vector<std::tuple<int, int>> temp = to_be_changed;
             int cur_x = tilex + i;
             int cur_y = tiley + j;
-            while(grid_places[cur_x][cur_y] == opponent)
+            while(cur_x >= 0 && cur_y >= 0 && grid_places[cur_x][cur_y] == opponent)
             {
                 temp.push_back(std::make_tuple(cur_x,cur_y));
                 cur_x += i;
                 cur_y += j;
             }
-            if(grid_places[cur_x][cur_y] == player)
+            if(cur_x >= 0 && cur_y >= 0 && grid_places[cur_x][cur_y] == player)
             {
                 to_be_changed = temp;
             }
@@ -152,7 +152,10 @@ std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int til
     int cur_tile;
     int cur_x = tilex + cur_x_offset;
     int cur_y = tiley + cur_y_offset;
-    cur_tile = grid_places[cur_x][cur_y];
+    if(cur_x >= 0 && cur_y >= 0)
+    {
+        cur_tile = grid_places[cur_x][cur_y];
+    }
 
     // If top left tile is not an opponents tile it will not be considered
     if(cur_tile == player || cur_tile == 0 || cur_tile == 3 || (cur_x_offset == 0 && cur_y_offset == 0))
@@ -163,7 +166,7 @@ std::tuple<int, int> checkTile(int* grid_places [GRID_WIDTH], int tilex, int til
     }
 
     // If top left tile is opponents, continue looking up left until it finds a wall or a different tile
-    while(cur_tile == opponent && cur_x >= 0 && cur_y >= 0 && cur_x < 8 && cur_y < 8)
+    while(cur_tile == opponent && cur_x > 0 && cur_y > 0 && cur_x < 8 && cur_y < 8)
     {
         cur_x += cur_x_offset;
         cur_y += cur_y_offset;
